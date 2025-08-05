@@ -2,6 +2,8 @@
 import { computed, ref, watch } from 'vue'
 import { breakpointsTailwind } from '@vueuse/core'
 import type { Mail } from '~/types'
+import { ManualChecksList } from '#components'
+import type { verification } from '@prisma/client'
 
 const tabItems = [{
   label: 'All',
@@ -12,18 +14,18 @@ const tabItems = [{
 }]
 const selectedTab = ref('all')
 
-const { data: mails } = await useFetch<Mail[]>('/api/mails', { default: () => [] })
+const { data: verifications } = await useFetch<verification[]>('/api/verifications/manual-check', { default: () => [] })
 
 // Filter mails based on the selected tab
 const filteredMails = computed(() => {
   if (selectedTab.value === 'unread') {
-    return mails.value.filter(mail => !!mail.unread)
+    return verifications.value.filter(mail => !!mail.manual_check_wanted)
   }
 
-  return mails.value
+  return verifications.value
 })
 
-const selectedMail = ref<Mail | null>()
+const selectedMail = ref<verification | null>()
 
 const isMailPanelOpen = computed({
   get() {
@@ -36,12 +38,6 @@ const isMailPanelOpen = computed({
   }
 })
 
-// Reset selected mail if it's not in the filtered mails
-watch(filteredMails, () => {
-  if (!filteredMails.value.find(mail => mail.id === selectedMail.value?.id)) {
-    selectedMail.value = null
-  }
-})
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('lg')
@@ -72,10 +68,10 @@ const isMobile = breakpoints.smaller('lg')
         />
       </template>
     </UDashboardNavbar>
-    <InboxList v-model="selectedMail" :mails="filteredMails" />
+    <ManualChecksList v-model="selectedMail" :verifications="verifications" />
   </UDashboardPanel>
 
-  <InboxMail v-if="selectedMail" :mail="selectedMail" @close="selectedMail = null" />
+  <ManualChecksVerification v-if="selectedMail" :verification="selectedMail" @close="selectedMail = null" />
   <div v-else class="hidden lg:flex flex-1 items-center justify-center">
     <UIcon name="i-lucide-inbox" class="size-32 text-dimmed" />
   </div>
@@ -83,7 +79,7 @@ const isMobile = breakpoints.smaller('lg')
   <ClientOnly>
     <USlideover v-if="isMobile" v-model:open="isMailPanelOpen">
       <template #content>
-        <InboxMail v-if="selectedMail" :mail="selectedMail" @close="selectedMail = null" />
+        <ManualChecksVerification v-if="selectedMail" :verification="selectedMail" @close="selectedMail = null" />
       </template>
     </USlideover>
   </ClientOnly>
