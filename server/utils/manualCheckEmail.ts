@@ -6,7 +6,7 @@ import Mailgun from "mailgun.js";
 const translations: Record<locales, Record<string, string>> = {
         en: {
             sender_name: "✅ {shopName} order Verified | OneGuard",
-            email_title: "✅ Your order verification is successful.",
+            email_title: "Your order verification is successful.",
             headline: "Your {shopName} has been verified. Your order is now shipped!",
             short_text: "Our team has successfully verified your identity. Your order is now on its way.",
             order: "Reference",
@@ -15,7 +15,7 @@ const translations: Record<locales, Record<string, string>> = {
         },
         de: {
             sender_name: "✅ {shopName} Bestellung verifiziert | OneGuard",
-            email_title: "✅ Ihre Verifizierung war erfolgreich.",
+            email_title: "Ihre Verifizierung war erfolgreich.",
             headline: "Ihre {shopName} Bestellung wurde verifiziert. Ihre Bestellung ist jetzt versendet!",
             short_text: "Unser Team hat Ihre Identität erfolgreich verifiziert. Ihre Bestellung ist jetzt auf dem Weg.",
             order: "Referenz",
@@ -25,7 +25,7 @@ const translations: Record<locales, Record<string, string>> = {
         },
         fr: {
             sender_name: "✅ {shopName} commande vérifiée | OneGuard",
-            email_title: "✅ Votre vérification est réussie.",
+            email_title: "Votre vérification est réussie.",
             headline: "Votre {shopName} a été vérifié. Votre commande est maintenant expédiée !",
             short_text: "Notre équipe a réussi à vérifier votre identité. Votre commande est en route.",
             order: "Référence",
@@ -55,13 +55,10 @@ function translate(
 interface ReminderOptions {
     toEmail: string;
     toName: string;
-    verificationToken: string;
     shopName: string;
     orderName: string;
-    timeLeft: number;
     publicUrl?: string;
     lang?: locales;
-    urgent?: boolean;
 }
 
 /**
@@ -72,7 +69,6 @@ export async function sendManualCheckSuccess({
     toName,
     shopName,
     orderName,
-    timeLeft,
     publicUrl,
     lang = "en",
 }: ReminderOptions): Promise<{ success: boolean; message: string }> {
@@ -94,7 +90,6 @@ export async function sendManualCheckSuccess({
     const vars: Record<string, string> = {
         shopName,
         orderName,
-        timeLeft: timeLeft.toString(),
         current_year: new Date().getFullYear().toString(),
     };
 

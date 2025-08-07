@@ -7,6 +7,17 @@ const props = defineProps<{
   verification: verification
 }>()
 
+const jobsLoading = ref(false)
+const jobs = ref<verification_job[]>([])
+
+const syncJobs = async () => {
+  jobsLoading.value = true
+  jobs.value = await $fetch<verification_job[]>('/api/verifications/jobs', {
+    method: 'POST',
+    body: JSON.stringify({ id: props.verification.id })
+  })
+  jobsLoading.value = false
+}
 
 watch(() => props.verification, async (newVerification) => {
   await syncJobs();
@@ -15,8 +26,6 @@ watch(() => props.verification, async (newVerification) => {
 const emits = defineEmits(['close'])
 
 
-const jobs = ref<verification_job[]>([])
-const jobsLoading = ref(false)
 
 const idNumber = ref<string>()
 const idCountry = ref<string>()
@@ -28,20 +37,12 @@ onMounted(async () => {
   await syncJobs()
 })
 
-const syncJobs = async () => {
-  jobsLoading.value = true
-  jobs.value = await $fetch<verification_job[]>('/api/verifications/jobs', {
-    method: 'POST',
-    body: JSON.stringify({ id: props.verification.id })
-  })
-  jobsLoading.value = false
-}
 
 watch(jobs, (newJobs) => {
     idNumber.value = newJobs.map(job => job.id_number || '')[0]
     idCountry.value = newJobs.map(job => job.id_country || '')[0]
-    idBirthday.value = newJobs.map(job => job.birthday ? format(new Date(job.birthday), 'dd MMM yyyy') : '')[0]
-    idExpiryDate.value = newJobs.map(job => job.expiry_date ? format(new Date(job.expiry_date), 'dd MMM yyyy') : '')[0]
+    idBirthday.value = newJobs.map(job => job.birthday?.toString() || '')[0]
+    idExpiryDate.value = newJobs.map(job => job.expiry_date?.toString() || '')[0]
     idName.value = newJobs.map(job => job.id_name || '')[0]
 })
 
