@@ -39,11 +39,14 @@ onMounted(async () => {
 
 
 watch(jobs, (newJobs) => {
-    idNumber.value = newJobs.map(job => job.id_number || '')[0]
-    idCountry.value = newJobs.map(job => job.id_country || '')[0]
-    idBirthday.value = newJobs.map(job => job.birthday?.toString() || '')[0]
-    idExpiryDate.value = newJobs.map(job => job.expiry_date?.toString() || '')[0]
-    idName.value = newJobs.map(job => job.id_name || '')[0]
+  const firstWith = (key: keyof verification_job) =>
+    (newJobs.find(job => job[key])?.[key] ?? '') as string
+
+  idNumber.value = firstWith('id_number')
+  idCountry.value = firstWith('id_country')
+  idBirthday.value = firstWith('birthday')?.toString() || ''
+  idExpiryDate.value = firstWith('expiry_date')?.toString() || ''
+  idName.value = firstWith('id_name')
 })
 
 const idIsValid = computed(() => {

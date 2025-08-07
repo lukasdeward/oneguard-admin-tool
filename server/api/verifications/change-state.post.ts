@@ -64,8 +64,8 @@ export default eventHandler(async (event) => {
             });
 
             if (!shopifyCallback) {
-            console.error(`Failed to send Shopify callback for verification ${body.verification_id}.`);
-            console.error(shopifyCallback);
+                console.error(`Failed to send Shopify callback for verification ${body.verification_id}.`);
+                console.error(shopifyCallback);
             }
         }
 

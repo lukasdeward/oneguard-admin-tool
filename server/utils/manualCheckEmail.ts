@@ -7,7 +7,7 @@ const translations: Record<locales, Record<string, string>> = {
         en: {
             sender_name: "✅ {shopName} order Verified | OneGuard",
             email_title: "Your order verification is successful.",
-            headline: "Your {shopName} has been verified. Your order is now shipped!",
+            headline: "Your {shopName} has been verified. Your order will be shipped soon!",
             short_text: "Our team has successfully verified your identity. Your order is now on its way.",
             order: "Reference",
             customer: "Name",
@@ -16,7 +16,7 @@ const translations: Record<locales, Record<string, string>> = {
         de: {
             sender_name: "✅ {shopName} Bestellung verifiziert | OneGuard",
             email_title: "Ihre Verifizierung war erfolgreich.",
-            headline: "Ihre {shopName} Bestellung wurde verifiziert. Ihre Bestellung ist jetzt versendet!",
+            headline: "Ihre {shopName} Bestellung wurde verifiziert. Ihre Bestellung wird bald versendet!",
             short_text: "Unser Team hat Ihre Identität erfolgreich verifiziert. Ihre Bestellung ist jetzt auf dem Weg.",
             order: "Referenz",
             customer: "Name",
