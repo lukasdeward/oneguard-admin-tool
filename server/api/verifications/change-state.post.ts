@@ -84,6 +84,17 @@ export default eventHandler(async (event) => {
     } else if (action === 'cancel') {
         
         console.log("Cancelling verification with ID:", verificationId);
+
+        await prisma.verification.update({
+            where: {
+                id: verificationId,
+            },
+            data: {
+                done: false,
+                manual_check_wanted: false,
+            },
+        });
+
     } else {
         return {
             status: 400,

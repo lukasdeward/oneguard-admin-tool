@@ -14,7 +14,7 @@ const tabItems = [{
 }]
 const selectedTab = ref('all')
 
-const { data: verifications } = await useFetch<verification[]>('/api/verifications/manual-check', { default: () => [] })
+const { data: verifications, refresh: refreshVerifications } = await useFetch<verification[]>('/api/verifications/manual-check', { default: () => [] })
 
 // Filter mails based on the selected tab
 const filteredMails = computed(() => {
@@ -38,6 +38,14 @@ const isMailPanelOpen = computed({
   }
 })
 
+const closeVerification = async () => {
+  await refreshVerifications()
+  if (verifications.value.length > 0) {
+    selectedMail.value = verifications.value[0]
+  } else {
+    selectedMail.value = null
+  }
+}
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('lg')
@@ -71,7 +79,7 @@ const isMobile = breakpoints.smaller('lg')
     <ManualChecksList v-model="selectedMail" :verifications="verifications" />
   </UDashboardPanel>
 
-  <ManualChecksVerification v-if="selectedMail" :verification="selectedMail" @close="selectedMail = null" />
+  <ManualChecksVerification v-if="selectedMail" :verification="selectedMail" @close="closeVerification" />
   <div v-else class="hidden lg:flex flex-1 items-center justify-center">
     <UIcon name="i-lucide-inbox" class="size-32 text-dimmed" />
   </div>
@@ -79,7 +87,7 @@ const isMobile = breakpoints.smaller('lg')
   <ClientOnly>
     <USlideover v-if="isMobile" v-model:open="isMailPanelOpen">
       <template #content>
-        <ManualChecksVerification v-if="selectedMail" :verification="selectedMail" @close="selectedMail = null" />
+        <ManualChecksVerification v-if="selectedMail" :verification="selectedMail" @close="closeVerification" />
       </template>
     </USlideover>
   </ClientOnly>
