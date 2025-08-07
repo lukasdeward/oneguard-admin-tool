@@ -7,10 +7,16 @@ const props = defineProps<{
   verification: verification
 }>()
 
+
+watch(() => props.verification, async (newVerification) => {
+  await syncJobs();
+}, { immediate: true })
+
 const emits = defineEmits(['close'])
 
 
 const jobs = ref<verification_job[]>([])
+const jobsLoading = ref(false)
 
 const idNumber = ref<string>()
 const idCountry = ref<string>()
@@ -19,12 +25,17 @@ const idExpiryDate = ref<string>()
 const idName = ref<string>()
 
 onMounted(async () => {
-    jobs.value = await $fetch<verification_job[]>('/api/verifications/jobs', {
-        method: 'POST',
-        body: JSON.stringify({ id: props.verification.id })
-    })
-
+  await syncJobs()
 })
+
+const syncJobs = async () => {
+  jobsLoading.value = true
+  jobs.value = await $fetch<verification_job[]>('/api/verifications/jobs', {
+    method: 'POST',
+    body: JSON.stringify({ id: props.verification.id })
+  })
+  jobsLoading.value = false
+}
 
 watch(jobs, (newJobs) => {
     idNumber.value = newJobs.map(job => job.id_number || '')[0]
@@ -35,13 +46,40 @@ watch(jobs, (newJobs) => {
 })
 
 const idIsValid = computed(() => {
-    jobs.value.filter(job => {
-        if (job.id_valid) {
-            return job.id_valid
-        }
+  return jobs.value.filter(job => {
+      if (job.id_valid) {
+          return job.id_valid
+      }
     })
 })
 
+const acceptRequest = async () => {
+  await $fetch('/api/verifications/change-state', {
+    method: 'POST',
+    body: JSON.stringify({ 
+      action: 'complete',
+      id: props.verification.id, 
+      idData: {
+        id_number: idNumber.value,
+        id_country: idCountry.value,
+        id_birthday: idBirthday.value,
+        id_expiry_date: idExpiryDate.value,
+        id_name: idName.value
+      }
+    })
+  })
+
+  emits('close')
+}
+
+const denyRequest = async () => {
+  await $fetch('/api/verifications/change-state', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'cancel', id: props.verification.id })
+  })
+
+  emits('close')
+}
 
 const dropdownItems = [[{
   label: 'Mark as unread',
@@ -94,25 +132,24 @@ function onSubmit() {
       </template>
 
       <template #right>
-        <UTooltip text="Archive">
-          <UButton
-            icon="i-lucide-inbox"
-            color="neutral"
-            variant="ghost"
-          />
-        </UTooltip>
+        <UButton
+          class="m-4"
+          color="error"
+          :loading="loading"
+          :disabled="jobsLoading"
+          @click="denyRequest"
+        >
+          Ablehnen
+        </UButton>  
 
-        <UTooltip text="Reply">
-          <UButton icon="i-lucide-reply" color="neutral" variant="ghost" />
-        </UTooltip>
-
-        <UDropdownMenu :items="dropdownItems">
-          <UButton
-            icon="i-lucide-ellipsis-vertical"
-            color="neutral"
-            variant="ghost"
-          />
-        </UDropdownMenu>
+        <UButton
+          class="m-4"
+          color="success"
+          :disabled="jobsLoading"
+          @click="acceptRequest"
+        >
+          Akzeptieren
+        </UButton>  
       </template>
     </UDashboardNavbar>
 
@@ -137,34 +174,51 @@ function onSubmit() {
     </div>
 
     <div class="overflow-y-auto divide-y divide-default">
-
+      
+      <div class="h-96 flex items-center justify-center" v-if="jobsLoading">
+        <UIcon name="i-svg-spinners:bars-rotate-fade" class="size-6 text-muted mx-auto my-4" />
+      </div>
+      <div v-else>
         <template v-for="job in jobs" :key="job.id">
           <Job class="m-4" :verification_job="job" />
         </template>
         <h2 class="text-2xl px-4 pt-4">Informationen</h2>
         
         <div class="p-4 flex flex-col gap-4">
-          <p class="text-muted text-sm">
-            <span class="font-semibold">Bestell Name:</span> {{ verification.customer_name }}
+          <p class="text-lg">
+            <span class="font-semibold">Bestell Name:</span> 
+            {{ verification.customer_name }}
           </p>
           <p class="text-muted text-sm">
-            <span class="font-semibold">Ausweis Name:</span> {{ idName }}
+            <span class="font-semibold">Ausweis Name:</span> 
             <UInput v-model="idName" />
           </p>
           <p class="text-muted text-sm">
-            <span class="font-semibold">Ausweis Nummer:</span> {{ idNumber }}
+            <span class="font-semibold">Ausweis Nummer:</span> 
             <UInput v-model="idNumber" />
           </p>
           <p class="text-muted text-sm">
-            <span class="font-semibold">Ausweis Gültig Bis:</span> {{ idExpiryDate }}
+            <span class="font-semibold">Ausweis Gültig Bis:</span> 
             <UInput v-model="idExpiryDate" />
 
           </p>
           <p class="text-muted text-sm">
-            <span class="font-semibold">Ausweis Geburtsdatum:</span> {{ idBirthday }}
+            <span class="font-semibold">Ausweis Geburtsdatum:</span> 
             <UInput v-model="idBirthday" />
-
         </p>
+          <p class="text-muted text-sm">
+            <span class="font-semibold">Ausweis Land:</span> 
+            <UInput v-model="idCountry" />
+          </p>
+          <p class="text-muted text-sm">
+            <span class="font-semibold">Ausweis Gültig:</span> 
+            <UBadge :color="idIsValid ? 'success' : 'error'" >
+              {{ idIsValid.length > 0 ? 'Ja' : 'Nein' }}
+            </UBadge>
+          </p>
+        </div>
+
+
 
         </div>
     </div>
