@@ -5,7 +5,7 @@ import Mailgun from "mailgun.js";
 // Combined translations for reminders and urgent reminders
 const translations: Record<locales, Record<string, string>> = {
         en: {
-            sender_name: "✅ {shopName} order Verified | OneGuard",
+            sender_name: "{shopName} order Verified | OneGuard",
             email_title: "Your order verification is successful.",
             headline: "Your {shopName} has been verified. Your order will be shipped soon!",
             short_text: "Our team has successfully verified your identity. Your order is now on its way.",
@@ -14,7 +14,7 @@ const translations: Record<locales, Record<string, string>> = {
             view_order: "View on {shopName}",
         },
         de: {
-            sender_name: "✅ {shopName} Bestellung verifiziert | OneGuard",
+            sender_name: "{shopName} Bestellung verifiziert | OneGuard",
             email_title: "Ihre Verifizierung war erfolgreich.",
             headline: "Ihre {shopName} Bestellung wurde verifiziert. Ihre Bestellung wird bald versendet!",
             short_text: "Unser Team hat Ihre Identität erfolgreich verifiziert. Ihre Bestellung ist jetzt auf dem Weg.",
@@ -24,7 +24,7 @@ const translations: Record<locales, Record<string, string>> = {
 
         },
         fr: {
-            sender_name: "✅ {shopName} commande vérifiée | OneGuard",
+            sender_name: "{shopName} commande vérifiée | OneGuard",
             email_title: "Votre vérification est réussie.",
             headline: "Votre {shopName} a été vérifié. Votre commande est maintenant expédiée !",
             short_text: "Notre équipe a réussi à vérifier votre identité. Votre commande est en route.",
