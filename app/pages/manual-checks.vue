@@ -53,33 +53,25 @@ const isMobile = breakpoints.smaller('lg')
 
 <template>
   <UDashboardPanel
-    id="inbox-1"
+    id="manual-checks"
     :default-size="25"
     :min-size="20"
     :max-size="30"
     resizable
   >
-    <UDashboardNavbar title="Inbox">
+    <UDashboardNavbar title="Manual Checks">
       <template #leading>
         <UDashboardSidebarCollapse />
       </template>
-      <template #trailing>
-        <UBadge :label="filteredMails.length" variant="subtle" />
-      </template>
 
       <template #right>
-        <UTabs
-          v-model="selectedTab"
-          :items="tabItems"
-          :content="false"
-          size="xs"
-        />
+        <UBadge :label="filteredMails.length" variant="subtle" />
       </template>
     </UDashboardNavbar>
     <ManualChecksList v-model="selectedMail" :verifications="verifications" />
   </UDashboardPanel>
 
-  <ManualChecksVerification v-if="selectedMail" :verification="selectedMail" @close="closeVerification" />
+  <HomeVerification v-if="selectedMail" :verification="selectedMail" @close="closeVerification" />
   <div v-else class="hidden lg:flex flex-1 items-center justify-center">
     <UIcon name="i-lucide-inbox" class="size-32 text-dimmed" />
   </div>
