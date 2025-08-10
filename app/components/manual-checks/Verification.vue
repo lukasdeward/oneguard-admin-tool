@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { verification, verification_job } from '@prisma/client';
-import { format } from 'date-fns'
+import { format, set } from 'date-fns'
 import Job from './Job.vue'
+import { CalendarDate } from '@internationalized/date';
 
 const props = defineProps<{
   verification: verification
@@ -37,6 +38,38 @@ onMounted(async () => {
   await syncJobs()
 })
 
+const idBirthdayParsed = computed({
+  get() {
+    const date = new Date(idBirthday.value ?? '')
+    return isNaN(date.getTime()) ? null : new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate())
+  },
+  set(setValue: CalendarDate | null) {
+    if (setValue instanceof CalendarDate) {
+      // Convert CalendarDate to JS Date and format as ISO string (UTC)
+      const jsDate = new Date(Date.UTC(setValue.year, setValue.month - 1, setValue.day, 0, 0, 0, 0));
+      idBirthday.value = jsDate.toISOString();
+    } else {
+      idBirthday.value = '';
+    }
+  }
+})
+
+
+const idExpiryDateParsed = computed({
+  get() {
+    const date = new Date(idExpiryDate.value ?? '')
+    return isNaN(date.getTime()) ? null : new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate())
+  },
+  set(setValue: CalendarDate | null) {
+    if (setValue instanceof CalendarDate) {
+      // Convert CalendarDate to JS Date and format as ISO string (UTC)
+      const jsDate = new Date(Date.UTC(setValue.year, setValue.month - 1, setValue.day, 0, 0, 0, 0));
+      idExpiryDate.value = jsDate.toISOString();
+    } else {
+      idExpiryDate.value = '';
+    }
+  }
+})
 
 watch(jobs, (newJobs) => {
   const firstWith = (key: keyof verification_job) =>
@@ -50,11 +83,14 @@ watch(jobs, (newJobs) => {
 })
 
 const idIsValid = computed(() => {
-  return jobs.value.filter(job => {
-      if (job.id_valid) {
-          return job.id_valid
-      }
-    })
+  const result = false;
+
+  for (const job of jobs.value) {
+    if (job.id_valid) {
+      return true
+    }
+  }
+  return result
 })
 
 const acceptRequest = async () => {
@@ -205,10 +241,14 @@ function onSubmit() {
             <span class="font-semibold">Ausweis Gültig Bis:</span> 
             <UInput v-model="idExpiryDate" />
 
+            <UCalendar v-model="idExpiryDateParsed" />
+
           </p>
           <p class="text-muted text-sm">
             <span class="font-semibold">Ausweis Geburtsdatum:</span> 
             <UInput v-model="idBirthday" />
+            <UCalendar v-model="idBirthdayParsed" />
+
         </p>
           <p class="text-muted text-sm">
             <span class="font-semibold">Ausweis Land:</span> 
@@ -217,12 +257,10 @@ function onSubmit() {
           <p class="text-muted text-sm">
             <span class="font-semibold">Ausweis Gültig:</span> 
             <UBadge :color="idIsValid ? 'success' : 'error'" >
-              {{ idIsValid.length > 0 ? 'Ja' : 'Nein' }}
+              {{ idIsValid ? 'Ja' : 'Nein' }}
             </UBadge>
           </p>
         </div>
-
-
 
         </div>
     </div>
