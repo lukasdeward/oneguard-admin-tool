@@ -4,6 +4,7 @@ import { breakpointsTailwind } from '@vueuse/core'
 import type { Mail } from '~/types'
 import { ManualChecksList } from '#components'
 import type { verification } from '@prisma/client'
+import ManualVerification from '~/components/manual-checks/ManualVerification.vue'
 
 const tabItems = [{
   label: 'All',
@@ -71,7 +72,7 @@ const isMobile = breakpoints.smaller('lg')
     <ManualChecksList v-model="selectedMail" :verifications="verifications" />
   </UDashboardPanel>
 
-  <HomeVerification v-if="selectedMail" :verification="selectedMail" @close="closeVerification" />
+  <ManualVerification v-if="selectedMail" :verification="selectedMail" @close="closeVerification" />
   <div v-else class="hidden lg:flex flex-1 items-center justify-center">
     <UIcon name="i-lucide-inbox" class="size-32 text-dimmed" />
   </div>
@@ -79,7 +80,7 @@ const isMobile = breakpoints.smaller('lg')
   <ClientOnly>
     <USlideover v-if="isMobile" v-model:open="isMailPanelOpen">
       <template #content>
-        <ManualChecksVerification v-if="selectedMail" :verification="selectedMail" @close="closeVerification" />
+        <ManualVerification v-if="selectedMail" :verification="selectedMail" @close="closeVerification" />
       </template>
     </USlideover>
   </ClientOnly>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { verification, verification_job } from '@prisma/client';
 import { format, set } from 'date-fns'
-import Job from './Job.vue'
 import { CalendarDate } from '@internationalized/date';
+import ManualJob from './ManualJob.vue';
 
 const props = defineProps<{
   verification: verification
@@ -220,7 +220,7 @@ function onSubmit() {
       </div>
       <div v-else>
         <template v-for="job in jobs" :key="job.id">
-          <Job class="m-4" :verification_job="job" />
+          <ManualJob class="m-4" :verification_job="job" />
         </template>
         <h2 class="text-2xl px-4 pt-4">Informationen</h2>
         
