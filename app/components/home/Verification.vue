@@ -2,7 +2,7 @@
 import type { verification, verification_job } from '@prisma/client';
 import { format, set } from 'date-fns'
 import { CalendarDate } from '@internationalized/date';
-import Job from './Job.vue'
+import Job from './Job.vue';
 
 const props = defineProps<{
   verification: verification
@@ -93,8 +93,69 @@ const idIsValid = computed(() => {
   return result
 })
 
+const acceptRequest = async () => {
+  await $fetch('/api/verifications/change-state', {
+    method: 'POST',
+    body: JSON.stringify({ 
+      action: 'complete',
+      id: props.verification.id, 
+      idData: {
+        id_number: idNumber.value,
+        id_country: idCountry.value,
+        id_birthday: idBirthday.value,
+        id_expiry_date: idExpiryDate.value,
+        id_name: idName.value
+      }
+    })
+  })
 
+  emits('close')
+}
 
+const denyRequest = async () => {
+  await $fetch('/api/verifications/change-state', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'cancel', id: props.verification.id })
+  })
+
+  emits('close')
+}
+
+const dropdownItems = [[{
+  label: 'Mark as unread',
+  icon: 'i-lucide-check-circle'
+}, {
+  label: 'Mark as important',
+  icon: 'i-lucide-triangle-alert'
+}], [{
+  label: 'Star thread',
+  icon: 'i-lucide-star'
+}, {
+  label: 'Mute thread',
+  icon: 'i-lucide-circle-pause'
+}]]
+
+const toast = useToast()
+
+const reply = ref('')
+const loading = ref(false)
+
+function onSubmit() {
+  loading.value = true
+
+  setTimeout(() => {
+    reply.value = ''
+
+    toast.add({
+      title: 'Email sent',
+      description: 'Your email has been sent successfully',
+      icon: 'i-lucide-check-circle',
+      color: 'success'
+    })
+
+    loading.value = false
+  }, 1000)
+}
 </script>
 
 <template>
@@ -110,6 +171,26 @@ const idIsValid = computed(() => {
         />
       </template>
 
+      <template #right>
+        <UButton
+          class="m-4"
+          color="error"
+          :loading="loading"
+          :disabled="jobsLoading"
+          @click="denyRequest"
+        >
+          Ablehnen
+        </UButton>  
+
+        <UButton
+          class="m-4"
+          color="success"
+          :disabled="jobsLoading"
+          @click="acceptRequest"
+        >
+          Akzeptieren
+        </UButton>  
+      </template>
     </UDashboardNavbar>
 
     <div class="flex flex-col sm:flex-row justify-between gap-1 p-4 sm:px-6 border-b border-default">
